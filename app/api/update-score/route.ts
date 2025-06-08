@@ -1,5 +1,4 @@
 import { sql } from "@/app/(config)/postgres";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { computeReputationScoring } from "reputation-scoring";
 
@@ -8,16 +7,16 @@ export const maxDuration = 60;
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { owner, repo, contributor } = body;
-
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get("github_session");
+    const { owner, repo, contributor, githubToken } = body;
+    console.log({ owner, repo, contributor, githubToken });
 
     const scoreInfo = await computeReputationScoring({
       owner,
       repo,
-      token: sessionCookie?.value,
+      token: githubToken,
     });
+
+    console.log({ scoreInfo });
 
     const score = scoreInfo.userScores.filter(
       (item) => item.user === contributor.login

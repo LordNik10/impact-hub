@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { cookies } from "next/headers";
+import { GithubField } from "../GithubField";
 
 export default async function ProjectPage({
   params,
@@ -438,25 +439,7 @@ export default async function ProjectPage({
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="score-threshold">
-                      Soglia Minima Punteggio
-                    </Label>
-                    <Input
-                      id="score-threshold"
-                      type="number"
-                      defaultValue="50"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Punteggio minimo per essere considerato un contributore
-                      attivo
-                    </p>
-                  </div>
-                  <div className="pt-4">
-                    <Button variant="destructive">Elimina Progetto</Button>
-                  </div>
-                </div>
+                <GithubField user_id={project.user_id} />
               </CardContent>
             </Card>
           </TabsContent>

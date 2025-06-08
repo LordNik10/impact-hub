@@ -17,6 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Download, Github, RefreshCw, Webhook } from "lucide-react";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface Contributor {
@@ -42,11 +43,68 @@ export function RepositoryAnalyzerPage({
   initialRepoDetails,
   initialContributors,
 }: Readonly<RepositoryAnalyzerPageProps>) {
+  const { id } = useParams<{ id: string }>();
+
   const [contributors, setContributors] = useState<Contributor[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isLoadingRefresh, setIsLoadingRefresh] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [repoDetails, setRepoDetails] = useState<any>(initialRepoDetails);
+  const [githubToken, setGithubToken] = useState<string>("");
+  const [userId, setUserId] = useState<string>();
+
+  console.log({ githubToken, userId });
+
+  useEffect(() => {
+    const fetchProject = async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_APP_URL}/api/project/${id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data: {
+        id: string;
+        name: string;
+        repo_name: string;
+        user_id: string;
+        owner: string;
+      } = await res.json();
+      console.log({ data });
+
+      setUserId(data.user_id);
+    };
+
+    fetchProject();
+  }, []);
+
+  useEffect(() => {
+    if (!userId) return;
+    const fetchGithubToken = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_APP_URL}/api/user-token/${userId}`
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch GitHub token");
+        }
+
+        const data = await response.json();
+        console.log(data);
+
+        setGithubToken(data.github_token || "");
+      } catch (error) {
+        console.error("Error fetching GitHub token:", error);
+      }
+    };
+
+    fetchGithubToken();
+  }, [userId]);
 
   useEffect(() => {
     if (initialContributors.length > 0) {
@@ -291,6 +349,7 @@ export function RepositoryAnalyzerPage({
                       owner,
                       repo,
                       contributor,
+                      githubToken,
                     }),
                   })
                 )
